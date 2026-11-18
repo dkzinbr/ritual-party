@@ -17,3 +17,11 @@ scripts/_*.json
 # Script local de setup
 configurar-git.bat
 commit-log.txt
+enviar-github.bat
+push-log.txt
+salvar-alteracoes.bat
+salvar-log.txt
+corrigir-git.bat
+corrigir-log.txt
+testar-e-commitar.bat
+testes-log.txt

@@ -33,10 +33,11 @@ const BACKUP_PREFIX = "rp_bak_";
 const BACKUP_COUNT = "rp_bak_n";
 
 export function saveBackupCookie(payload: string) {
+  const parts = Math.max(1, Math.ceil(payload.length / CHUNK));
+  // Too big to store: keep the previous backup instead of wiping it.
+  if (parts > 20) return;
   const previous = Number(readCookie(BACKUP_COUNT) || "0");
   for (let index = 0; index < previous; index += 1) clearCookie(`${BACKUP_PREFIX}${index}`);
-  const parts = Math.max(1, Math.ceil(payload.length / CHUNK));
-  if (parts > 20) return;
   for (let index = 0; index < parts; index += 1) {
     writeCookie(`${BACKUP_PREFIX}${index}`, payload.slice(index * CHUNK, (index + 1) * CHUNK));
   }
