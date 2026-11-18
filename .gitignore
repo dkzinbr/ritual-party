@@ -1,0 +1,19 @@
+node_modules
+dist
+.env
+data
+*.log
+scripts/cloudflared.exe
+22evy-enzonic.zip
+.vercel
+.env*
+
+# Arquivos temporários gerados pelos scripts
+scripts/_*/
+scripts/_*.js
+scripts/_*.mjs
+scripts/_*.json
+
+# Script local de setup
+configurar-git.bat
+commit-log.txt

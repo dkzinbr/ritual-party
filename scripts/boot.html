@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#070102" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>22Evy</title>
+    <link rel="stylesheet" href="/assets/index-BMQyXMKy.css" />
+  </head>
+  <body>
+    <div id="root" class="mx-auto w-full max-w-lg px-5 py-10"></div>
+    <script>
+      const TK = "ritual-party-token";
+      const HK = "ritual-party-host";
+      const root = document.getElementById("root");
+      const btn = "min-h-12 w-full rounded-full px-5 py-3 uppercase tracking-wide bg-[#120608] text-[#f7f1e8]";
+      const ghost = "min-h-12 w-full rounded-full px-5 py-3 border border-[#f7f1e8]/35 bg-transparent text-[#f7f1e8]";
+      const field = "field mt-2";
+      const isHost = location.pathname.startsWith("/mestre");
+      let err = "";
+
+      async function api(path, init = {}, token = localStorage.getItem(TK)) {
+        const headers = Object.assign({}, init.headers || {});
+        if (token) headers.Authorization = "Bearer " + token;
+        if (typeof init.body === "string") headers["Content-Type"] = "application/json";
+        const ht = sessionStorage.getItem(HK);
+        if (ht && path.indexOf("/host/") !== -1) headers["x-host-token"] = ht;
+        const res = await fetch(path, Object.assign({}, init, { headers }));
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || "Não deu certo.");
+        return data;
+      }
+
+      function el(html) {
+        root.innerHTML = html;
+      }
+
+      function countdown(startsAt, serverNow) {
+        const end = new Date(startsAt).getTime();
+        const skew = Date.now() - new Date(serverNow).getTime();
+        const left = Math.max(0, end - (Date.now() - skew));
+        const d = Math.floor(left / 86400000);
+        const h = Math.floor((left % 86400000) / 3600000);
+        const m = Math.floor((left % 3600000) / 60000);
+        return d + "d " + h + "h " + m + "min";
+      }
+
+      async function boot() {
+        try {
+          if (isHost) return drawHost();
+          const token = localStorage.getItem(TK);
+          const state = await api("/api/state");
+          if (!state.me) return drawName(state);
+          return drawGuest(state);
+        } catch (e) {
+          el('<p class="sheet text-ember">' + (e.message || err || "Não consegui abrir a festa.") + '</p><button class="' + btn + '" id="retry">Tentar de novo</button>');
+          document.getElementById("retry").onclick = boot;
+        }
+      }
+
+      function drawName(state) {
+        el(
+          '<header class="mb-8 text-center"><p class="kicker">31 de outubro · 18h</p><h1 class="hero-word text-7xl">22Evy</h1><p class="mt-4 text-bone">' +
+            (state.party.address || "") +
+            '</p></header><form id="f" class="sheet space-y-4"><label class="block text-sm">Seu nome<input class="' +
+            field +
+            '" name="name" required minlength="2" maxlength="40" /></label><p class="text-ember text-sm" id="e"></p><button class="' +
+            btn +
+            '">Entrar</button></form>'
+        );
+        document.getElementById("f").onsubmit = async (ev) => {
+          ev.preventDefault();
+          try {
+            const name = ev.target.name.value.trim();
+            const created = await api("/api/guests", { method: "POST", body: JSON.stringify({ name }) }, null);
+            localStorage.setItem(TK, created.token);
+            boot();
+          } catch (e) {
+            document.getElementById("e").textContent = e.message;
+          }
+        };
+      }
+
+      function drawGuest(state) {
+        const me = state.me;
+        const party = state.party;
+        let body =
+          '<header class="mb-8 text-center"><p class="kicker">Olá, ' +
+          me.name +
+          '</p><h1 class="hero-word text-7xl">22Evy</h1><div class="brush mx-auto my-5 w-full max-w-xs"></div><p class="text-bone">' +
+          countdown(party.startsAt, party.serverNow) +
+          '</p><p class="mt-2 text-sm text-bone/80">' +
+          party.whenLabel +
+          " · " +
+          party.address +
+          '</p></header>';
+        if (!me.status) {
+          body +=
+            '<div class="sheet space-y-3"><p>Você vem?</p><button class="' +
+            btn +
+            '" id="going">Sim, vou</button><button class="' +
+            ghost +
+            '" id="no">Não vou</button></div>';
+          el(body);
+          document.getElementById("going").onclick = async () => {
+            await api("/api/me", { method: "PATCH", body: JSON.stringify({ status: "going" }) });
+            boot();
+          };
+          document.getElementById("no").onclick = async () => {
+            await api("/api/me", { method: "PATCH", body: JSON.stringify({ status: "not_going" }) });
+            boot();
+          };
+          return;
+        }
+        if (me.status === "not_going") {
+          body += '<div class="sheet"><p>Presença recusada. Se mudar de ideia, volta aqui.</p></div>';
+          el(body);
+          return;
+        }
+        if (!me.bringingReady) {
+          body +=
+            '<form id="bring" class="sheet space-y-4"><p>O que você traz pro churrasco e de beber?</p><input class="' +
+            field +
+            '" name="bringing" placeholder="O que traz" required /><input class="' +
+            field +
+            '" name="drink" placeholder="Bebida" required /><p class="text-ember text-sm" id="e"></p><button class="' +
+            btn +
+            '">Salvar</button></form>';
+          el(body);
+          document.getElementById("bring").onsubmit = async (ev) => {
+            ev.preventDefault();
+            try {
+              await api("/api/me", {
+                method: "PATCH",
+                body: JSON.stringify({ bringing: ev.target.bringing.value, drink: ev.target.drink.value }),
+              });
+              boot();
+            } catch (e) {
+              document.getElementById("e").textContent = e.message;
+            }
+          };
+          return;
+        }
+        if (!me.joinedGame && !me.declinedGame) {
+          body +=
+            '<div class="sheet space-y-3"><p>Entrar no Ritual da Ordem?</p><button class="' +
+            btn +
+            '" id="join">Confirmar participação</button><button class="' +
+            ghost +
+            '" id="skip">Só vou à festa</button></div>';
+          el(body);
+          document.getElementById("join").onclick = async () => {
+            await api("/api/me/join", { method: "POST" });
+            boot();
+          };
+          document.getElementById("skip").onclick = async () => {
+            await api("/api/me", { method: "PATCH", body: JSON.stringify({ declinedGame: true }) });
+            boot();
+          };
+          return;
+        }
+        if (me.joinedGame && me.team && me.teamSeen) {
+          const team = me.team === "ritual" ? "Seita" : "Ordem";
+          body += '<div class="sheet"><p class="kicker">Seu time</p><h2 class="text-4xl font-display">' + team + "</h2></div>";
+          if (state.missions) {
+            body += state.missions
+              .map(
+                (m) =>
+                  '<div class="sheet mt-3"><p class="kicker">Missão ' +
+                  m.id.slice(-1) +
+                  '</p><h3>' +
+                  m.title +
+                  "</h3><p>" +
+                  m.description +
+                  '</p><p class="mt-2 text-sm">' +
+                  (m.status === "open" ? "Aberta" : m.status) +
+                  "</p></div>"
+              )
+              .join("");
+          } else {
+            body += '<p class="mt-4 text-sm text-bone/80">O mestre ainda não liberou as missões.</p>';
+          }
+          el(body);
+          return;
+        }
+        body += '<div class="sheet"><p>Participação confirmada. O mestre libera as equipes na hora.</p></div>';
+        el(body);
+      }
+
+      async function drawHost() {
+        const token = sessionStorage.getItem(HK);
+        if (!token) {
+          el(
+            '<header class="mb-8 text-center"><p class="kicker">Mestre</p><h1 class="hero-word text-7xl">22Evy</h1></header><form id="pin" class="sheet space-y-4"><label>PIN<input class="' +
+              field +
+              '" name="pin" inputmode="numeric" required /></label><p class="text-ember text-sm" id="e"></p><button class="' +
+              btn +
+              '">Entrar</button></form>'
+          );
+          document.getElementById("pin").onsubmit = async (ev) => {
+            ev.preventDefault();
+            try {
+              const out = await api("/api/host/login", { method: "POST", body: JSON.stringify({ pin: ev.target.pin.value }) }, null);
+              sessionStorage.setItem(HK, out.token);
+              drawHost();
+            } catch (e) {
+              document.getElementById("e").textContent = e.message;
+            }
+          };
+          return;
+        }
+        try {
+          const ov = await api("/api/host/overview");
+          let html =
+            '<header class="mb-8 text-center"><p class="kicker">Mestre</p><h1 class="hero-word text-5xl">22Evy</h1></header><button class="' +
+            btn +
+            '" id="draw">Liberar a brincadeira</button><p class="text-ember text-sm mt-2" id="e"></p><div class="sheet mt-6"><p class="kicker">Convidados</p>';
+          html += (ov.guests || [])
+            .map((g) => "<p>" + g.name + " · " + (g.status || "sem RSVP") + (g.joinedGame ? " · no jogo" : "") + "</p>")
+            .join("");
+          html += "</div>";
+          el(html);
+          document.getElementById("draw").onclick = async () => {
+            try {
+              await api("/api/host/draw", { method: "POST" });
+              drawHost();
+            } catch (e) {
+              document.getElementById("e").textContent = e.message;
+            }
+          };
+        } catch (e) {
+          sessionStorage.removeItem(HK);
+          el('<p class="sheet">' + e.message + '</p><button class="' + btn + '" id="retry">Entrar de novo</button>');
+          document.getElementById("retry").onclick = drawHost;
+        }
+      }
+
+      boot();
+    </script>
+  </body>
+</html>

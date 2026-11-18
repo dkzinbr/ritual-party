@@ -1,0 +1,251 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: Girassol;
+  src: url("/fonts/Girassol-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Roman New Times";
+  src: url("/fonts/Roman_New_Times.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-display: Girassol, Georgia, serif;
+  --font-sans: "Roman New Times", "Times New Roman", Times, serif;
+  --color-ink: #1c0a0c;
+  --color-bone: #f7f1e8;
+  --color-gold: #f7f1e8;
+  --color-wine: #4a0c10;
+  --color-ember: #ffd0c6;
+  --color-veil: #f7f1e8;
+  --color-mist: #f4efe4;
+  --color-line: #2a1012;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: #f7f1e8;
+  font-size: 20px;
+  line-height: 1.5;
+  font-family: "Roman New Times", "Times New Roman", Times, serif;
+  background-color: #070102;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: #070102 url("/fundo.jpg") center / cover no-repeat;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+input,
+textarea,
+button {
+  font: inherit;
+}
+
+input,
+textarea {
+  font-size: 16px;
+}
+
+button {
+  cursor: pointer;
+}
+
+h1,
+h2,
+.font-display,
+.blood-title,
+.hero-word {
+  font-family: Girassol, Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.05;
+  text-transform: none;
+  color: #f7f1e8;
+}
+
+.sheet h1,
+.sheet h2,
+.sheet .font-display,
+.sheet .blood-title,
+.sheet-row h1,
+.sheet-row h2,
+.sheet-row .font-display,
+.sheet-row .blood-title {
+  color: #120608;
+}
+
+.hero-word {
+  display: inline-block;
+  line-height: 0.95;
+}
+
+.nav-tab {
+  font-family: "Roman New Times", "Times New Roman", Times, serif;
+  letter-spacing: 0.04em;
+}
+
+p,
+li,
+label,
+button,
+input,
+textarea {
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+
+.kicker {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.brush {
+  height: 18px;
+  background: #f7f1e8;
+  clip-path: polygon(
+    0 42%,
+    7% 18%,
+    16% 58%,
+    28% 12%,
+    41% 64%,
+    55% 20%,
+    68% 55%,
+    82% 16%,
+    100% 48%,
+    100% 72%,
+    84% 58%,
+    70% 86%,
+    52% 48%,
+    36% 80%,
+    18% 50%,
+    0 70%
+  );
+}
+
+.sheet,
+.sheet-row {
+  color: #1c0a0c;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), transparent 32%),
+    #f3ecdf;
+  filter: drop-shadow(0 14px 16px rgba(28, 0, 0, 0.38));
+}
+
+.sheet {
+  padding: 1.25rem 1.1rem 1.4rem;
+  clip-path: polygon(
+    0 10px,
+    16px 0,
+    38% 6px,
+    62% 0,
+    86% 5px,
+    100% 0,
+    100% calc(100% - 12px),
+    78% 100%,
+    46% calc(100% - 6px),
+    18% 100%,
+    0 calc(100% - 8px)
+  );
+}
+
+.sheet-row {
+  display: flex;
+  width: 100%;
+  min-height: 4.25rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  text-align: left;
+  clip-path: polygon(0 7px, 14px 0, 100% 2px, 100% calc(100% - 8px), calc(100% - 12px) 100%, 0 100%);
+}
+
+.sheet [class*="text-bone"],
+.sheet-row [class*="text-bone"],
+.sheet [class*="text-gold"],
+.sheet-row [class*="text-gold"] {
+  color: rgba(28, 10, 12, 0.72) !important;
+}
+
+.sheet .text-ember,
+.sheet-row .text-ember {
+  color: #8d1d24 !important;
+}
+
+.sheet .text-veil,
+.sheet-row .text-veil {
+  color: #3d1518 !important;
+}
+
+.field {
+  width: 100%;
+  min-height: 3rem;
+  border: 1px solid rgba(28, 10, 12, 0.3);
+  background: rgba(255, 255, 255, 0.55);
+  color: #1c0a0c;
+  padding: 0.7rem 0.85rem;
+  border-radius: 2px;
+}
+
+.field:focus {
+  outline: 2px solid #6e1218;
+  outline-offset: 1px;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise 0.7s ease both;
+}
+
+@keyframes pulse-ring {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.ring-live {
+  animation: pulse-ring 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .ring-live {
+    animation: none;
+  }
+
+}

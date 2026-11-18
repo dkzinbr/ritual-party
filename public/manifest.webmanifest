@@ -1,0 +1,10 @@
+{
+  "name": "22Evy",
+  "short_name": "22Evy",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070102",
+  "theme_color": "#070102",
+  "lang": "pt-BR",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

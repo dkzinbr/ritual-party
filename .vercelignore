@@ -1,0 +1,13 @@
+data
+dist
+*.log
+scripts/_layout_eval
+scripts/_layout_batches
+scripts/_boot_eval
+scripts/_store_eval
+scripts/_put_eval
+scripts/_asset_eval
+scripts/_b64_eval
+scripts/cloudflared.exe
+22evy-enzonic.zip
+agent-tools
